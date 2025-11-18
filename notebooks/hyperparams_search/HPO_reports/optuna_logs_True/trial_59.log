@@ -1,0 +1,31 @@
+Starting training for 50 epochs...
+--- Optuna Trial 59 ---
+Device: cuda
+Model parameters: 90,035
+----------------------------------------------------------------------
+Epoch   1/50 | Train Loss: 1.3481 | Val Loss: 1.3208 | LR: 0.000934
+  Train - Data Loss (MIXMSE): 1.3268, GD: 4.4124e+00,     RMSE: 0.7471, MAE: 0.3612
+  Val   - Data Loss (MIXMSE): 1.3208, GD: 1.5186e-01,     RMSE: 0.7483, MAE: 0.3437
+----------------------------------------------------------------------
+Epoch   2/50 | Train Loss: 1.2871 | Val Loss: 1.2897 | LR: 0.000934
+  Train - Data Loss (MIXMSE): 1.2842, GD: 6.1223e-01,     RMSE: 0.7346, MAE: 0.3517
+  Val   - Data Loss (MIXMSE): 1.2897, GD: 8.6221e-02,     RMSE: 0.7395, MAE: 0.3473
+----------------------------------------------------------------------
+Epoch   3/50 | Train Loss: 1.2525 | Val Loss: 1.2247 | LR: 0.000934
+  Train - Data Loss (MIXMSE): 1.2499, GD: 5.4555e-01,     RMSE: 0.7245, MAE: 0.3486
+  Val   - Data Loss (MIXMSE): 1.2247, GD: 8.1353e-01,     RMSE: 0.7207, MAE: 0.3482
+----------------------------------------------------------------------
+Epoch   4/50 | Train Loss: 1.1847 | Val Loss: 1.1642 | LR: 0.000934
+  Train - Data Loss (MIXMSE): 1.1795, GD: 1.0732e+00,     RMSE: 0.7042, MAE: 0.3529
+  Val   - Data Loss (MIXMSE): 1.1642, GD: 2.1254e-01,     RMSE: 0.7026, MAE: 0.3547
+----------------------------------------------------------------------
+Epoch   5/50 | Train Loss: 1.1161 | Val Loss: 1.1177 | LR: 0.000934
+  Train - Data Loss (MIXMSE): 1.1154, GD: 1.4000e-01,     RMSE: 0.6846, MAE: 0.3511
+  Val   - Data Loss (MIXMSE): 1.1177, GD: 1.3955e-01,     RMSE: 0.6885, MAE: 0.3451
+----------------------------------------------------------------------
+Epoch   6/50 | Train Loss: 1.0965 | Val Loss: 1.1062 | LR: 0.000934
+  Train - Data Loss (MIXMSE): 1.0956, GD: 1.9387e-01,     RMSE: 0.6788, MAE: 0.3475
+  Val   - Data Loss (MIXMSE): 1.1062, GD: 1.6002e-01,     RMSE: 0.6850, MAE: 0.3445
+----------------------------------------------------------------------
+
+--- TRIAL PRUNED AT EPOCH 6 ---

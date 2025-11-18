@@ -1,0 +1,27 @@
+Starting training for 50 epochs...
+--- Optuna Trial 16 ---
+Device: cuda
+Model parameters: 47,557
+----------------------------------------------------------------------
+Epoch   1/50 | Train Loss: 1.2683 | Val Loss: 1.1768 | LR: 0.008490
+  Train - Data Loss (MIXMSE): 1.2683, GD: 2.1513e+06,     RMSE: 0.7300, MAE: 0.3455
+  Val   - Data Loss (MIXMSE): 1.1768, GD: 7.5561e+06,     RMSE: 0.7064, MAE: 0.3157
+----------------------------------------------------------------------
+Epoch   2/50 | Train Loss: 1.2455 | Val Loss: 1.3581 | LR: 0.008490
+  Train - Data Loss (MIXMSE): 1.2455, GD: 3.0107e+06,     RMSE: 0.7229, MAE: 0.3385
+  Val   - Data Loss (MIXMSE): 1.3581, GD: 0.0000e+00,     RMSE: 0.7588, MAE: 0.3629
+----------------------------------------------------------------------
+Epoch   3/50 | Train Loss: 1.3347 | Val Loss: 1.3581 | LR: 0.008490
+  Train - Data Loss (MIXMSE): 1.3347, GD: 5.2316e-24,     RMSE: 0.7490, MAE: 0.3639
+  Val   - Data Loss (MIXMSE): 1.3581, GD: 4.2960e-17,     RMSE: 0.7588, MAE: 0.3631
+----------------------------------------------------------------------
+Epoch   4/50 | Train Loss: 1.3347 | Val Loss: 1.3581 | LR: 0.008490
+  Train - Data Loss (MIXMSE): 1.3347, GD: 9.4533e+01,     RMSE: 0.7494, MAE: 0.3637
+  Val   - Data Loss (MIXMSE): 1.3581, GD: 0.0000e+00,     RMSE: 0.7588, MAE: 0.3661
+----------------------------------------------------------------------
+Epoch   5/50 | Train Loss: 1.3350 | Val Loss: 1.3583 | LR: 0.008490
+  Train - Data Loss (MIXMSE): 1.3350, GD: 0.0000e+00,     RMSE: 0.7490, MAE: 0.3639
+  Val   - Data Loss (MIXMSE): 1.3583, GD: 0.0000e+00,     RMSE: 0.7588, MAE: 0.3614
+----------------------------------------------------------------------
+
+--- TRIAL PRUNED AT EPOCH 5 ---

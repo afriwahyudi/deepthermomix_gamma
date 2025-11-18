@@ -1,0 +1,212 @@
+Starting training for 50 epochs...
+--- Optuna Trial 15 ---
+Device: cuda
+Model parameters: 32,579
+----------------------------------------------------------------------
+Epoch   1/50 | Train Loss: 1.2439 | Val Loss: 1.2009 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 1.2439, GD: 4.7283e+05,     RMSE: 0.7230, MAE: 0.3418
+  Val   - Data Loss (MIXMSE): 1.2009, GD: 1.4360e+06,     RMSE: 0.7137, MAE: 0.3230
+----------------------------------------------------------------------
+Epoch   2/50 | Train Loss: 1.0515 | Val Loss: 0.9521 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 1.0515, GD: 1.1133e+07,     RMSE: 0.6640, MAE: 0.3190
+  Val   - Data Loss (MIXMSE): 0.9521, GD: 2.9415e+07,     RMSE: 0.6356, MAE: 0.3030
+----------------------------------------------------------------------
+Epoch   3/50 | Train Loss: 0.8159 | Val Loss: 0.7027 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.8159, GD: 2.7633e+07,     RMSE: 0.5845, MAE: 0.2772
+  Val   - Data Loss (MIXMSE): 0.7027, GD: 1.5356e+07,     RMSE: 0.5461, MAE: 0.2537
+----------------------------------------------------------------------
+Epoch   4/50 | Train Loss: 0.5910 | Val Loss: 0.5335 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.5910, GD: 1.3632e+07,     RMSE: 0.4977, MAE: 0.2417
+  Val   - Data Loss (MIXMSE): 0.5335, GD: 1.1395e+07,     RMSE: 0.4758, MAE: 0.2296
+----------------------------------------------------------------------
+Epoch   5/50 | Train Loss: 0.5302 | Val Loss: 0.4856 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.5302, GD: 1.2853e+07,     RMSE: 0.4706, MAE: 0.2285
+  Val   - Data Loss (MIXMSE): 0.4856, GD: 1.0446e+07,     RMSE: 0.4540, MAE: 0.2175
+----------------------------------------------------------------------
+Epoch   6/50 | Train Loss: 0.4258 | Val Loss: 0.3918 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.4258, GD: 1.5672e+07,     RMSE: 0.4228, MAE: 0.2085
+  Val   - Data Loss (MIXMSE): 0.3918, GD: 1.8756e+07,     RMSE: 0.4076, MAE: 0.2000
+----------------------------------------------------------------------
+Epoch   7/50 | Train Loss: 0.3848 | Val Loss: 0.3731 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.3848, GD: 1.3964e+07,     RMSE: 0.4018, MAE: 0.1987
+  Val   - Data Loss (MIXMSE): 0.3731, GD: 1.5024e+07,     RMSE: 0.3977, MAE: 0.1946
+----------------------------------------------------------------------
+Epoch   8/50 | Train Loss: 0.3470 | Val Loss: 0.3514 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.3470, GD: 1.1806e+07,     RMSE: 0.3817, MAE: 0.1889
+  Val   - Data Loss (MIXMSE): 0.3514, GD: 1.1185e+07,     RMSE: 0.3861, MAE: 0.1890
+----------------------------------------------------------------------
+Epoch   9/50 | Train Loss: 0.3262 | Val Loss: 0.3176 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.3262, GD: 1.0739e+07,     RMSE: 0.3698, MAE: 0.1831
+  Val   - Data Loss (MIXMSE): 0.3176, GD: 9.3998e+06,     RMSE: 0.3669, MAE: 0.1813
+----------------------------------------------------------------------
+Epoch  10/50 | Train Loss: 0.3140 | Val Loss: 0.2996 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.3140, GD: 1.0232e+07,     RMSE: 0.3631, MAE: 0.1801
+  Val   - Data Loss (MIXMSE): 0.2996, GD: 8.4816e+06,     RMSE: 0.3564, MAE: 0.1702
+----------------------------------------------------------------------
+Epoch  11/50 | Train Loss: 0.2964 | Val Loss: 0.3033 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2964, GD: 1.0239e+07,     RMSE: 0.3530, MAE: 0.1755
+  Val   - Data Loss (MIXMSE): 0.3033, GD: 9.7334e+06,     RMSE: 0.3587, MAE: 0.1704
+----------------------------------------------------------------------
+Epoch  12/50 | Train Loss: 0.2868 | Val Loss: 0.2791 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2868, GD: 1.0731e+07,     RMSE: 0.3469, MAE: 0.1721
+  Val   - Data Loss (MIXMSE): 0.2791, GD: 1.0568e+07,     RMSE: 0.3441, MAE: 0.1650
+----------------------------------------------------------------------
+Epoch  13/50 | Train Loss: 0.2702 | Val Loss: 0.3173 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2702, GD: 1.0818e+07,     RMSE: 0.3366, MAE: 0.1677
+  Val   - Data Loss (MIXMSE): 0.3173, GD: 9.1504e+06,     RMSE: 0.3669, MAE: 0.1752
+----------------------------------------------------------------------
+Epoch  14/50 | Train Loss: 0.2728 | Val Loss: 0.3144 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2728, GD: 1.1005e+07,     RMSE: 0.3383, MAE: 0.1677
+  Val   - Data Loss (MIXMSE): 0.3144, GD: 1.0433e+07,     RMSE: 0.3652, MAE: 0.1677
+----------------------------------------------------------------------
+Epoch  15/50 | Train Loss: 0.2910 | Val Loss: 0.2716 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2910, GD: 1.1206e+07,     RMSE: 0.3486, MAE: 0.1725
+  Val   - Data Loss (MIXMSE): 0.2716, GD: 1.1917e+07,     RMSE: 0.3393, MAE: 0.1654
+----------------------------------------------------------------------
+Epoch  16/50 | Train Loss: 0.2552 | Val Loss: 0.2558 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2552, GD: 1.0650e+07,     RMSE: 0.3273, MAE: 0.1628
+  Val   - Data Loss (MIXMSE): 0.2558, GD: 1.3416e+07,     RMSE: 0.3291, MAE: 0.1615
+----------------------------------------------------------------------
+Epoch  17/50 | Train Loss: 0.2507 | Val Loss: 0.3078 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2507, GD: 1.0630e+07,     RMSE: 0.3242, MAE: 0.1613
+  Val   - Data Loss (MIXMSE): 0.3078, GD: 9.1621e+06,     RMSE: 0.3612, MAE: 0.1773
+----------------------------------------------------------------------
+Epoch  18/50 | Train Loss: 0.2433 | Val Loss: 0.2501 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2433, GD: 1.0967e+07,     RMSE: 0.3195, MAE: 0.1587
+  Val   - Data Loss (MIXMSE): 0.2501, GD: 1.0587e+07,     RMSE: 0.3256, MAE: 0.1565
+----------------------------------------------------------------------
+Epoch  19/50 | Train Loss: 0.2450 | Val Loss: 0.2250 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2450, GD: 1.1230e+07,     RMSE: 0.3206, MAE: 0.1595
+  Val   - Data Loss (MIXMSE): 0.2250, GD: 1.0433e+07,     RMSE: 0.3088, MAE: 0.1495
+----------------------------------------------------------------------
+Epoch  20/50 | Train Loss: 0.2291 | Val Loss: 0.2368 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2291, GD: 1.0715e+07,     RMSE: 0.3100, MAE: 0.1538
+  Val   - Data Loss (MIXMSE): 0.2368, GD: 1.2566e+07,     RMSE: 0.3167, MAE: 0.1550
+----------------------------------------------------------------------
+Epoch  21/50 | Train Loss: 0.2309 | Val Loss: 0.2280 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2309, GD: 1.0888e+07,     RMSE: 0.3115, MAE: 0.1545
+  Val   - Data Loss (MIXMSE): 0.2280, GD: 1.0079e+07,     RMSE: 0.3109, MAE: 0.1501
+----------------------------------------------------------------------
+Epoch  22/50 | Train Loss: 0.2309 | Val Loss: 0.2296 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2309, GD: 1.0505e+07,     RMSE: 0.3110, MAE: 0.1538
+  Val   - Data Loss (MIXMSE): 0.2296, GD: 1.1630e+07,     RMSE: 0.3120, MAE: 0.1497
+----------------------------------------------------------------------
+Epoch  23/50 | Train Loss: 0.2218 | Val Loss: 0.2263 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2218, GD: 1.0804e+07,     RMSE: 0.3051, MAE: 0.1510
+  Val   - Data Loss (MIXMSE): 0.2263, GD: 1.2248e+07,     RMSE: 0.3095, MAE: 0.1504
+----------------------------------------------------------------------
+Epoch  24/50 | Train Loss: 0.2158 | Val Loss: 0.2174 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2158, GD: 1.1083e+07,     RMSE: 0.3010, MAE: 0.1485
+  Val   - Data Loss (MIXMSE): 0.2174, GD: 9.2951e+06,     RMSE: 0.3035, MAE: 0.1465
+----------------------------------------------------------------------
+Epoch  25/50 | Train Loss: 0.2170 | Val Loss: 0.2190 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2170, GD: 1.1074e+07,     RMSE: 0.3019, MAE: 0.1495
+  Val   - Data Loss (MIXMSE): 0.2190, GD: 9.8849e+06,     RMSE: 0.3047, MAE: 0.1477
+----------------------------------------------------------------------
+Epoch  26/50 | Train Loss: 0.2333 | Val Loss: 0.2277 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2333, GD: 1.0757e+07,     RMSE: 0.3123, MAE: 0.1539
+  Val   - Data Loss (MIXMSE): 0.2277, GD: 1.1224e+07,     RMSE: 0.3107, MAE: 0.1473
+----------------------------------------------------------------------
+Epoch  27/50 | Train Loss: 0.2204 | Val Loss: 0.2432 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2204, GD: 1.0467e+07,     RMSE: 0.3040, MAE: 0.1496
+  Val   - Data Loss (MIXMSE): 0.2432, GD: 1.1824e+07,     RMSE: 0.3209, MAE: 0.1553
+----------------------------------------------------------------------
+Epoch  28/50 | Train Loss: 0.2174 | Val Loss: 0.2051 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2174, GD: 1.0412e+07,     RMSE: 0.3013, MAE: 0.1489
+  Val   - Data Loss (MIXMSE): 0.2051, GD: 9.9085e+06,     RMSE: 0.2948, MAE: 0.1414
+----------------------------------------------------------------------
+Epoch  29/50 | Train Loss: 0.2005 | Val Loss: 0.2148 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2005, GD: 1.0156e+07,     RMSE: 0.2901, MAE: 0.1424
+  Val   - Data Loss (MIXMSE): 0.2148, GD: 1.0128e+07,     RMSE: 0.3017, MAE: 0.1454
+----------------------------------------------------------------------
+Epoch  30/50 | Train Loss: 0.2117 | Val Loss: 0.2071 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2117, GD: 1.0330e+07,     RMSE: 0.2977, MAE: 0.1464
+  Val   - Data Loss (MIXMSE): 0.2071, GD: 1.0159e+07,     RMSE: 0.2963, MAE: 0.1410
+----------------------------------------------------------------------
+Epoch  31/50 | Train Loss: 0.1994 | Val Loss: 0.1988 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1994, GD: 9.6838e+06,     RMSE: 0.2893, MAE: 0.1424
+  Val   - Data Loss (MIXMSE): 0.1988, GD: 1.0082e+07,     RMSE: 0.2902, MAE: 0.1404
+----------------------------------------------------------------------
+Epoch  32/50 | Train Loss: 0.1988 | Val Loss: 0.2181 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1988, GD: 9.8062e+06,     RMSE: 0.2889, MAE: 0.1419
+  Val   - Data Loss (MIXMSE): 0.2181, GD: 1.0494e+07,     RMSE: 0.3040, MAE: 0.1423
+----------------------------------------------------------------------
+Epoch  33/50 | Train Loss: 0.1949 | Val Loss: 0.1993 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1949, GD: 9.8556e+06,     RMSE: 0.2862, MAE: 0.1406
+  Val   - Data Loss (MIXMSE): 0.1993, GD: 8.8593e+06,     RMSE: 0.2905, MAE: 0.1366
+----------------------------------------------------------------------
+Epoch  34/50 | Train Loss: 0.2011 | Val Loss: 0.2376 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2011, GD: 9.5489e+06,     RMSE: 0.2903, MAE: 0.1422
+  Val   - Data Loss (MIXMSE): 0.2376, GD: 7.3170e+06,     RMSE: 0.3172, MAE: 0.1574
+----------------------------------------------------------------------
+Epoch  35/50 | Train Loss: 0.1956 | Val Loss: 0.2064 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1956, GD: 9.4449e+06,     RMSE: 0.2865, MAE: 0.1403
+  Val   - Data Loss (MIXMSE): 0.2064, GD: 9.4880e+06,     RMSE: 0.2957, MAE: 0.1363
+----------------------------------------------------------------------
+Epoch  36/50 | Train Loss: 0.1937 | Val Loss: 0.2402 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1937, GD: 9.6761e+06,     RMSE: 0.2850, MAE: 0.1396
+  Val   - Data Loss (MIXMSE): 0.2402, GD: 9.4523e+06,     RMSE: 0.3189, MAE: 0.1518
+----------------------------------------------------------------------
+Epoch  37/50 | Train Loss: 0.1975 | Val Loss: 0.1939 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1975, GD: 9.1037e+06,     RMSE: 0.2877, MAE: 0.1408
+  Val   - Data Loss (MIXMSE): 0.1939, GD: 9.9299e+06,     RMSE: 0.2866, MAE: 0.1373
+----------------------------------------------------------------------
+Epoch  38/50 | Train Loss: 0.1826 | Val Loss: 0.2311 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1826, GD: 9.5162e+06,     RMSE: 0.2769, MAE: 0.1355
+  Val   - Data Loss (MIXMSE): 0.2311, GD: 1.1386e+07,     RMSE: 0.3130, MAE: 0.1473
+----------------------------------------------------------------------
+Epoch  39/50 | Train Loss: 0.1904 | Val Loss: 0.2001 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1904, GD: 9.1598e+06,     RMSE: 0.2826, MAE: 0.1380
+  Val   - Data Loss (MIXMSE): 0.2001, GD: 8.7384e+06,     RMSE: 0.2912, MAE: 0.1393
+----------------------------------------------------------------------
+Epoch  40/50 | Train Loss: 0.2113 | Val Loss: 0.2119 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.2113, GD: 8.7660e+06,     RMSE: 0.2970, MAE: 0.1451
+  Val   - Data Loss (MIXMSE): 0.2119, GD: 7.9153e+06,     RMSE: 0.2996, MAE: 0.1436
+----------------------------------------------------------------------
+Epoch  41/50 | Train Loss: 0.1937 | Val Loss: 0.2062 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1937, GD: 8.9486e+06,     RMSE: 0.2846, MAE: 0.1387
+  Val   - Data Loss (MIXMSE): 0.2062, GD: 8.0022e+06,     RMSE: 0.2955, MAE: 0.1396
+----------------------------------------------------------------------
+Epoch  42/50 | Train Loss: 0.1818 | Val Loss: 0.2144 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1818, GD: 8.9300e+06,     RMSE: 0.2758, MAE: 0.1347
+  Val   - Data Loss (MIXMSE): 0.2144, GD: 6.7890e+06,     RMSE: 0.3014, MAE: 0.1411
+----------------------------------------------------------------------
+Epoch  43/50 | Train Loss: 0.1842 | Val Loss: 0.1925 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1842, GD: 8.8745e+06,     RMSE: 0.2778, MAE: 0.1352
+  Val   - Data Loss (MIXMSE): 0.1925, GD: 8.1961e+06,     RMSE: 0.2855, MAE: 0.1351
+----------------------------------------------------------------------
+Epoch  44/50 | Train Loss: 0.1825 | Val Loss: 0.1906 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1825, GD: 8.7830e+06,     RMSE: 0.2766, MAE: 0.1350
+  Val   - Data Loss (MIXMSE): 0.1906, GD: 9.4180e+06,     RMSE: 0.2841, MAE: 0.1346
+----------------------------------------------------------------------
+Epoch  45/50 | Train Loss: 0.1819 | Val Loss: 0.2007 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1819, GD: 8.9110e+06,     RMSE: 0.2763, MAE: 0.1348
+  Val   - Data Loss (MIXMSE): 0.2007, GD: 7.5233e+06,     RMSE: 0.2917, MAE: 0.1361
+----------------------------------------------------------------------
+Epoch  46/50 | Train Loss: 0.1840 | Val Loss: 0.1798 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1840, GD: 8.5377e+06,     RMSE: 0.2778, MAE: 0.1351
+  Val   - Data Loss (MIXMSE): 0.1798, GD: 8.1591e+06,     RMSE: 0.2759, MAE: 0.1324
+----------------------------------------------------------------------
+Epoch  47/50 | Train Loss: 0.1773 | Val Loss: 0.2276 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1773, GD: 8.6566e+06,     RMSE: 0.2729, MAE: 0.1328
+  Val   - Data Loss (MIXMSE): 0.2276, GD: 8.3250e+06,     RMSE: 0.3104, MAE: 0.1528
+----------------------------------------------------------------------
+Epoch  48/50 | Train Loss: 0.1780 | Val Loss: 0.1880 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1780, GD: 8.6502e+06,     RMSE: 0.2731, MAE: 0.1334
+  Val   - Data Loss (MIXMSE): 0.1880, GD: 7.9950e+06,     RMSE: 0.2822, MAE: 0.1347
+----------------------------------------------------------------------
+Epoch  49/50 | Train Loss: 0.1774 | Val Loss: 0.1856 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1774, GD: 8.4543e+06,     RMSE: 0.2729, MAE: 0.1329
+  Val   - Data Loss (MIXMSE): 0.1856, GD: 8.4173e+06,     RMSE: 0.2803, MAE: 0.1316
+----------------------------------------------------------------------
+Epoch  50/50 | Train Loss: 0.1802 | Val Loss: 0.2078 | LR: 0.003591
+  Train - Data Loss (MIXMSE): 0.1802, GD: 8.4314e+06,     RMSE: 0.2748, MAE: 0.1328
+  Val   - Data Loss (MIXMSE): 0.2078, GD: 7.0306e+06,     RMSE: 0.2966, MAE: 0.1386
+----------------------------------------------------------------------
+
+Training complete!
+Best validation loss: 0.1798 at epoch 46
+
+Evaluating on test set...
+Test Loss: 0.2083
+Test MIXMSE: 0.2083, GD: 7.0559e+06,     RMSE: 0.2970, MAE: 0.1385
