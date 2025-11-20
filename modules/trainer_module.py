@@ -61,11 +61,11 @@ class DTMPNNTrainer:
             print(message)
             
     def compute_losses(self, batched_data):
-        y_pred_batch, latent_vecs_batch, _ = self.model(batched_data)
+        y_pred_batch, _, _ = self.model(batched_data)
         
         data_driven_loss = self.datadriven_loss_fn(y_pred_batch, batched_data)
         
-        loss_gd = self.gd_loss_fn(batched_data, latent_vecs_batch)
+        loss_gd = self.gd_loss_fn(batched_data, y_pred_batch)
         
         if self.include_gd:
             total_loss = self.data_driven_weight * data_driven_loss + self.gd_weight * loss_gd
@@ -111,9 +111,9 @@ class DTMPNNTrainer:
         for batched_data in loader:
             batched_data = batched_data.to(self.device)
             
-            y_pred_batch, latent_vecs_batch, _ = self.model(batched_data)
+            y_pred_batch, _, _ = self.model(batched_data)
             
-            gd_loss = self.gd_loss_fn(batched_data, latent_vecs_batch)
+            gd_loss = self.gd_loss_fn(batched_data, y_pred_batch)
 
             with torch.no_grad():
                 data_driven_loss = self.datadriven_loss_fn(y_pred_batch, batched_data)
@@ -138,8 +138,11 @@ class DTMPNNTrainer:
     def train(self, epochs, save_dir='checkpoints', log_file_path='training_run_log.txt', 
               save_best=True, save_every=None, patience=None, optuna_trial=None):
         
-        save_path = Path(save_dir)
-        save_path.mkdir(exist_ok=True, parents=True)
+        if save_dir:
+            save_path = Path(save_dir)
+            save_path.mkdir(exist_ok=True, parents=True)
+        else:
+            save_path = None
         
         self.log_buffer = [] 
 
@@ -190,13 +193,14 @@ class DTMPNNTrainer:
                 self.best_epoch = epoch
                 if patience:
                     patience_counter = 0 
-                if save_best:
+                
+                if save_best and save_path:
                     self.save_checkpoint(save_path / 'best_model.pt', epoch)
                     self._log(f"  New best model saved! (Val Loss: {val_loss:.4f})")
             elif patience:
                 patience_counter += 1
             
-            if save_every and epoch % save_every == 0:
+            if save_every and save_path and epoch % save_every == 0:
                 self.save_checkpoint(save_path / f'checkpoint_epoch_{epoch}.pt', epoch)
             
             self._log("-" * 70)

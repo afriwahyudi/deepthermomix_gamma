@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import Descriptors
+from rdkit.Chem import Descriptors, AllChem
 import torch
 from torch_geometric.data import Data
 from typing import List, Tuple
@@ -266,7 +266,7 @@ class DataPipeline:
         Convert RDKit molecule to graph representation with rich features.
 
         Node features include:
-        - One-hot atom type (H, C, N, O) -> size 4
+        - One-hot atom type ('H', 'C', 'N', 'O', 'F', 'Si', 'P', 'S', 'Cl', 'Br', 'I') -> size 11
         - Hybridization (sp, sp2, sp3) -> size 3
         - Aromaticity -> size 1
         - Ring membership -> size 1
@@ -282,7 +282,9 @@ class DataPipeline:
             edge_attr: torch.Tensor [num_edges, num_edge_features]
         """
         # ATOMIC DEFINITIONS
+        pt = Chem.GetPeriodicTable()
         mol = Chem.AddHs(mol)
+        AllChem.ComputeGasteigerCharges(mol)
         atomic_types = ['H', 'C', 'N', 'O', 
                         'F', 'Si', 'P', 'S', 
                         'Cl', 'Br', 'I']
@@ -291,6 +293,7 @@ class DataPipeline:
         for atom in mol.GetAtoms():
             atom_type = atom.GetSymbol()
 
+            # ATOMIC IDENTITY
             # 1. Atom type one-hot
             atom_type_vec = [1 if atom_type == el else 0 for el in atomic_types]
 
@@ -317,10 +320,29 @@ class DataPipeline:
             # 6. Hydrogen bonding acceptor flag
             hydrogen_acceptor = [1 if atom_type in ['N', 'O', 'F'] else 0]
 
+            # 7. Formal charge
+            formal_charge = [atom.GetFormalCharge()]
+
+            # 8. Partial charge
+            g_charge = atom.GetDoubleProp('_GasteigerCharge')
+            if np.isnan(g_charge) or np.isinf(g_charge):
+                g_charge = 0.0
+            partial_charge = [g_charge]
+
+            # 9. Atomic mass
+            mass = [atom.GetMass() * 0.01]
+
+            # 10. Van der waals radius
+            vdw_radius = [pt.GetRvdw(atom.GetAtomicNum())]
+
+            # 11. Degree
+            degree = [atom.GetTotalDegree()]
             # Combine features
             features = (atom_type_vec + 
                         hyb_vec + aromaticity + in_ring +
                          hydrogen_donor + hydrogen_acceptor 
+                         + formal_charge + partial_charge 
+                         + mass + vdw_radius + degree
                          )
             node_features.append(features)
 

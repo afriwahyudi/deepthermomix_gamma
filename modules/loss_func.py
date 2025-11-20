@@ -88,8 +88,8 @@ class GibbsDuhemLoss(nn.Module):
 
     Args:
         loss_type (str): 'explicit' or 'optimized'. Defaults: 'optimized'.
-            - 'explicit' : Slow, explicit implementation.
-            - 'optimized': Fast, batched implementation.
+            - 'explicit' : Slow, explicit implementation    ; complexity O(N^2) per mixture
+            - 'optimized': Fast, batched implementation     ; complexity O(N) per mixture
     """
 
     def __init__(self, loss_type='optimized', track_graph=True):
@@ -97,22 +97,21 @@ class GibbsDuhemLoss(nn.Module):
         self.loss_type = loss_type
         self.track_graph = track_graph
 
-    def forward(self, data, ln_gamma_calc):
+    def forward(self, data, prediction):
         """
         Args:
-            data: PyG Data object with component_mole_frac and component_batch_batch
-            ln_gamma_calc: [num_components_total] from DeepThermoMix
+            data            : PyG Data object with component_mole_frac and component_batch_batch
+            ln_gamma_calc   : [num_components_total] from DeepThermoMix
         
         Returns:
-            gd_loss: Scalar loss enforcing Gibbs-Duhem constraint
+            gd_loss         : Scalar loss enforcing Gibbs-Duhem constraint
         """
 
         mole_frac = data.component_mole_frac
         component_batch = data.component_batch_batch
         T = 298.15
-        R = 8.31446261815324   
-        ln_gamma = ln_gamma_calc.sum(dim=-1)     
-        g_excess = ln_gamma * (R * T)
+        R = 8.31446261815324  
+        g_excess_partial = prediction * (R * T)
 
         if self.loss_type == 'explicit':
             gd_loss_batch = []
@@ -121,52 +120,61 @@ class GibbsDuhemLoss(nn.Module):
                 mask = (component_batch == batch_idx)
                 indices = torch.where(mask)[0]
                 
-                g_excess_i = g_excess[indices]
+                # Slice data for this specific mixture
+                g_partial_local = g_excess_partial[indices]
                 num_components = len(indices)
                 
+                # Construct Jacobian Matrix: J_ij = ∂(g_i^E) / ∂(x_j)
                 jacobian_rows = []
                 for i in range(num_components):
                     full_grad = autograd.grad(
-                        outputs=g_excess_i[i],
+                        outputs=g_partial_local[i],
                         inputs=mole_frac,
                         retain_graph=True,
                         create_graph=self.track_graph
                     )[0]
                     
-                    batch_grad = full_grad[indices]
-                    jacobian_rows.append(batch_grad)
+                    local_gradients = full_grad[indices]
+                    jacobian_rows.append(local_gradients)
                 
                 jacobian = torch.stack(jacobian_rows)
                 
+                # Calculate Consistency Residual (v_j)
                 x_i = mole_frac[indices]
+                consistency_residual = torch.matmul(x_i.unsqueeze(0), jacobian).squeeze()
                 
-                vj = torch.matmul(x_i.unsqueeze(0), jacobian).squeeze()
-                vj_mean = torch.mean(vj)
-                gd_loss_sample = torch.sum((vj - vj_mean) ** 2)
+                # Enforce Gibbs-Duhem: Variance of v_j must be 0 (Source 72)
+                residual_mean = torch.mean(consistency_residual)
+                gd_loss_sample = torch.sum((consistency_residual - residual_mean) ** 2)
                 gd_loss_batch.append(gd_loss_sample)
 
             gd_loss = torch.mean(torch.stack(gd_loss_batch))
         
         elif self.loss_type == 'optimized':
             
-            S = mole_frac * g_excess
-            S_per_sample = scatter_add(S, component_batch, dim=0)
+            # 1. Calculate Total Excess Gibbs Energy of the Mixture (g^E)
+            # Formula: g^E = sum(x_i * g_i^E)  (Source 79, Eq B14)
+            weighted_energy = mole_frac * g_excess_partial
+            g_excess_total = scatter_add(weighted_energy, component_batch, dim=0)
             
-            (full_grad,) = autograd.grad(
-                outputs=torch.sum(S_per_sample),
+            # 2. Calculate Gradient of Total Energy w.r.t. Mole Fractions
+            # Formula: ∂(g^E) / ∂(x_j)
+            (gradient_total_energy,) = autograd.grad(
+                outputs=torch.sum(g_excess_total),
                 inputs=mole_frac,
                 retain_graph=True,
                 create_graph=self.track_graph
             )
             
-            vj = full_grad - g_excess
+            # 3. Calculate Consistency Residual (v_j)
+            # Derived Relation: v_j = ∂g^E/∂x_j - g_j^E  (Source 97, Eq B11)
+            consistency_residual = gradient_total_energy - g_excess_partial
             
-            vj_mean_per_sample = scatter_mean(vj, component_batch, dim=0)
-            vj_mean_expanded = vj_mean_per_sample[component_batch]
-            
-            gd_loss_sample = (vj - vj_mean_expanded) ** 2
-
-            gd_loss_batch = scatter_add(gd_loss_sample, component_batch, dim=0)
+            # 4. Enforce GD consistency: Variance of v_j must be 0
+            residual_mean_per_mixture = scatter_mean(consistency_residual, component_batch, dim=0)
+            residual_mean_expanded = residual_mean_per_mixture[component_batch]
+            variance_penalty = (consistency_residual - residual_mean_expanded) ** 2
+            gd_loss_batch = scatter_add(variance_penalty, component_batch, dim=0)
             
             gd_loss = torch.mean(gd_loss_batch)
 

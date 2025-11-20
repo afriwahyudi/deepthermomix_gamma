@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.autograd as autograd
 from torch_geometric.nn import MessagePassing, global_mean_pool, global_add_pool
 from torch_geometric.utils import add_self_loops
+from torch_scatter import scatter_add, scatter_mean
 
 # 1. Custom MPNN Layer
 class MPNNLayer(MessagePassing):
@@ -86,11 +87,10 @@ class DeepThermoMix(nn.Module):
 
     def forward(self, comp_emb, mole_frac,
                 component_batch_batch,
-                track_grad=False): 
+                track_grad=True): 
         
         if track_grad:
             mole_frac = mole_frac.requires_grad_(True)
-        
         mole_frac_view = mole_frac.view(-1, 1)
 
         raw_context_input = torch.cat([comp_emb, mole_frac_view], dim=-1)
@@ -117,7 +117,8 @@ class DTMPNN(nn.Module):
                  latent_dim, 
                  context_dim,
                  graph_layers=3,
-                 track_grad=False):
+                 track_grad=True,
+                 constraint_type='soft'):
         """
         Args:
             node_dim           : Dimensionality of node features
@@ -125,12 +126,20 @@ class DTMPNN(nn.Module):
             graph_hidden_dim   : Hidden dimension for MPNN
             graph_layers       : Number of MPNN layers
             latent_dim         : Hidden dimension for DeepThermoMix
+            context_dim        : Context vector dimension for DeepThermoMix
+            constraint_type    : 'soft' or 'hard' defaults to 'soft'
+                - 'soft': Enforce Gibbs-Duhem equation via tuneable loss function
+                - 'hard': Impose Gibbs-Duhem Equation via permanent mathematical construction
         """
         super(DTMPNN, self).__init__()
-        self.track_grad    = track_grad
-        self.graph_block   = MPNNBlock(node_dim, edge_dim, graph_hidden_dim, num_layers=graph_layers)
-        self.mixture_layer = DeepThermoMix(graph_hidden_dim, latent_dim, context_dim)
-        self.output_layer  = nn.Linear(latent_dim, 1)
+        self.constraint_type    = constraint_type
+        self.track_grad         = track_grad
+        if self.constraint_type == 'hard':
+            self.track_grad = True
+        self.graph_block        = MPNNBlock(node_dim, edge_dim, graph_hidden_dim, num_layers=graph_layers)
+        self.mixture_layer      = DeepThermoMix(graph_hidden_dim, latent_dim, context_dim)
+        self.output_layer_soft  = nn.Linear(latent_dim, 1)
+        self.output_layer_hard  = nn.Linear(latent_dim, 1)
 
     def forward(self, data):
         """
@@ -143,11 +152,45 @@ class DTMPNN(nn.Module):
         node_emb, comp_emb = self.graph_block(data.x, data.edge_index, 
                                               data.edge_attr, data.mol_batch)
         latent_vectors, mole_frac = self.mixture_layer(
-            comp_emb, 
-            data.component_mole_frac,
-            data.component_batch_batch,
-            self.track_grad)
-        
-        ln_gamma_calc = self.output_layer(latent_vectors).squeeze(-1)
+                                                        comp_emb, 
+                                                        data.component_mole_frac,
+                                                        data.component_batch_batch,
+                                                        self.track_grad)
+             
+        if self.constraint_type == 'soft':
+            # Soft Constraint: Direct prediction of ln(gamma_i)
+            ln_gammas_calc = self.output_layer_soft(latent_vectors).squeeze(-1)
+            prediction = ln_gammas_calc
 
-        return ln_gamma_calc, latent_vectors, comp_emb 
+        elif self.constraint_type == 'hard':
+            pseudo_output = self.output_layer_hard(latent_vectors).squeeze(-1)
+            g_excess_total = scatter_add(pseudo_output, data.component_batch_batch, dim=0)
+
+            # Calculate gradient of g^E w.r.t. mole fractions
+            (dgE_dx,) = autograd.grad(
+                outputs=g_excess_total.sum(),
+                inputs=mole_frac,
+                retain_graph=True,
+                create_graph=True
+            )
+            
+            # Term A: g^E (Broadcasted back to component dimension)
+            term_A = g_excess_total[data.component_batch_batch]
+            
+            # Term B: ∂g^E/∂x_i
+            term_B = dgE_dx
+            
+            # Term C: sum(x_j * ∂g^E/∂x_j)
+            x_times_gradient = mole_frac * dgE_dx
+            correction_term = scatter_add(x_times_gradient, data.component_batch_batch, dim=0)
+            term_C = correction_term[data.component_batch_batch]
+
+            # 5. Final Calculation
+            partial_molar_excess_gibbs = term_A + term_B - term_C
+            
+            # Convert to ln(gamma)
+            R = 8.31446261815324
+            T = 298.15
+            prediction = partial_molar_excess_gibbs / (R * T)
+
+        return prediction, latent_vectors, comp_emb 

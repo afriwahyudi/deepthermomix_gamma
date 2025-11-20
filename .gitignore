@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+notebooks/training_phase/__debug__/
+notebooks/training_phase/crossval/
+notebooks/training_phase/final_model/
+notebooks/hyperparams_search/HPO_reports/
+datasets/canonical_data.csv
+datasets/spreadsheet
