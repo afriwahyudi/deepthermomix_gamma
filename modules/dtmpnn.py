@@ -70,19 +70,19 @@ class DeepThermoMix(nn.Module):
         super(DeepThermoMix, self).__init__()
         
         self.interaction_mlp = nn.Sequential(
-            nn.Linear(component_emb_dim + 1, context_dim),
-            nn.Softplus(),          
+            nn.Linear(component_emb_dim, context_dim),
+            nn.SiLU(),          
             nn.Linear(context_dim, context_dim),
-            nn.Softplus()
+            nn.Identity()
         )
         
-        gate_input_dim = component_emb_dim + 1 + context_dim
+        gate_input_dim = component_emb_dim + context_dim + 1
         
         self.gate_mlp = nn.Sequential(
             nn.Linear(gate_input_dim, latent_dim),
-            nn.Softplus(),
+            nn.SiLU(),
             nn.Linear(latent_dim, latent_dim),
-            nn.Softplus()
+            nn.Identity()
         )
 
     def forward(self, comp_emb, mole_frac,
@@ -93,10 +93,10 @@ class DeepThermoMix(nn.Module):
             mole_frac = mole_frac.requires_grad_(True)
         mole_frac_view = mole_frac.view(-1, 1)
 
-        raw_context_input = torch.cat([comp_emb, mole_frac_view], dim=-1)
-        mixture_context_pooled = global_mean_pool(raw_context_input, component_batch_batch)
-        mixture_context_vec = self.interaction_mlp(mixture_context_pooled)
-        mixture_context_expanded = mixture_context_vec[component_batch_batch]
+        weighted_comp_emb = comp_emb * mole_frac_view
+        mixture_state = scatter_add(weighted_comp_emb, component_batch_batch, dim=0)
+        mixture_context_pooled = self.interaction_mlp(mixture_state)
+        mixture_context_expanded = mixture_context_pooled[component_batch_batch]
 
         gate_input = torch.cat([
             comp_emb, 
@@ -107,7 +107,19 @@ class DeepThermoMix(nn.Module):
         latent_vectors = self.gate_mlp(gate_input)
 
         return latent_vectors, mole_frac
+    
+    def forward_pure(self, comp_emb):
+        num_comps = comp_emb.size(0)
+        device = comp_emb.device
 
+        ones = torch.ones((num_comps, 1), device=device, dtype=comp_emb.dtype)
+        comp_interaction_vec = self.interaction_mlp(comp_emb)
+        pure_context_vec = comp_interaction_vec
+        gate_input = torch.cat([comp_emb, ones, pure_context_vec], dim=-1)
+        
+        pure_latent_vectors = self.gate_mlp(gate_input)
+        return pure_latent_vectors
+    
 # 4. Parameterizable Full Model
 class DTMPNN(nn.Module):
     def __init__(self, 
@@ -118,7 +130,7 @@ class DTMPNN(nn.Module):
                  context_dim,
                  graph_layers=3,
                  track_grad=True,
-                 constraint_type='soft'):
+                 constraint_type='hard'):
         """
         Args:
             node_dim           : Dimensionality of node features
@@ -128,8 +140,8 @@ class DTMPNN(nn.Module):
             latent_dim         : Hidden dimension for DeepThermoMix
             context_dim        : Context vector dimension for DeepThermoMix
             constraint_type    : 'soft' or 'hard' defaults to 'soft'
-                - 'soft': Enforce Gibbs-Duhem equation via tuneable loss function
-                - 'hard': Impose Gibbs-Duhem Equation via permanent mathematical construction
+                - 'soft'            : Enforce Gibbs-Duhem equation via tuneable loss function
+                - 'hard'            : Impose Gibbs-Duhem Equation via permanent mathematical construction
         """
         super(DTMPNN, self).__init__()
         self.constraint_type    = constraint_type
@@ -151,25 +163,27 @@ class DTMPNN(nn.Module):
         """
         node_emb, comp_emb = self.graph_block(data.x, data.edge_index, 
                                               data.edge_attr, data.mol_batch)
-        latent_vectors, mole_frac = self.mixture_layer(
+        latent_vectors_mix, mole_frac = self.mixture_layer(
                                                         comp_emb, 
                                                         data.component_mole_frac,
                                                         data.component_batch_batch,
                                                         self.track_grad)
              
         if self.constraint_type == 'soft':
-            # Soft Constraint: Direct prediction of ln(gamma_i)
-            ln_gammas_calc = self.output_layer_soft(latent_vectors).squeeze(-1)
+            ln_gammas_calc = self.output_layer_soft(latent_vectors_mix).squeeze(-1)
             prediction = ln_gammas_calc
 
         elif self.constraint_type == 'hard':
-            pseudo_output = self.output_layer_hard(latent_vectors).squeeze(-1)
-            weighted_pseudo_output = mole_frac * pseudo_output
-            g_excess_total = scatter_add(weighted_pseudo_output, data.component_batch_batch, dim=0)
+            latent_vectors_pure = self.mixture_layer.forward_pure(comp_emb)
+            pseudo_output_mix  = self.output_layer_hard(latent_vectors_mix).squeeze(-1)
+            pseudo_output_pure = self.output_layer_hard(latent_vectors_pure).squeeze(-1)
+            excess_contribution = mole_frac * (pseudo_output_mix - pseudo_output_pure)
+
+            g_excess_total = scatter_add(excess_contribution, data.component_batch_batch, dim=0)
 
             # Calculate gradient of g^E w.r.t. mole fractions
             (dgE_dx,) = autograd.grad(
-                outputs=g_excess_total.sum(),
+                outputs=torch.sum(g_excess_total),
                 inputs=mole_frac,
                 retain_graph=True,
                 create_graph=True
@@ -194,4 +208,4 @@ class DTMPNN(nn.Module):
             T = 298.15
             prediction = partial_molar_excess_gibbs / (R * T)
 
-        return prediction, latent_vectors, comp_emb 
+        return prediction, latent_vectors_mix, comp_emb 
