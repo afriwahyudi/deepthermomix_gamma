@@ -164,7 +164,8 @@ class DTMPNN(nn.Module):
 
         elif self.constraint_type == 'hard':
             pseudo_output = self.output_layer_hard(latent_vectors).squeeze(-1)
-            g_excess_total = scatter_add(pseudo_output, data.component_batch_batch, dim=0)
+            weighted_pseudo_output = mole_frac * pseudo_output
+            g_excess_total = scatter_add(weighted_pseudo_output, data.component_batch_batch, dim=0)
 
             # Calculate gradient of g^E w.r.t. mole fractions
             (dgE_dx,) = autograd.grad(

@@ -72,7 +72,7 @@ class DTMPNNTrainer:
         else:
             total_loss = self.data_driven_weight * data_driven_loss
                 
-        y_true = batched_data.component_gammas.detach().cpu().numpy()
+        y_true = batched_data.component_ln_gammas.detach().cpu().numpy()
         y_pred = y_pred_batch.detach().cpu().numpy()
         rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
         mae = np.mean(np.abs(y_true - y_pred))
@@ -121,7 +121,7 @@ class DTMPNNTrainer:
                 total_data_driven_loss += data_driven_loss.item()
                 total_gd_loss += gd_loss.item() 
 
-                all_true.append(batched_data.component_gammas.detach().cpu().numpy())
+                all_true.append(batched_data.component_ln_gammas.detach().cpu().numpy())
                 all_pred.append(y_pred_batch.detach().cpu().numpy())
             
         y_true = np.concatenate(all_true, axis=0)

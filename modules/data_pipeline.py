@@ -23,10 +23,10 @@ class DataPipeline:
               info are always parsed with RDKit internally.
         2. Raw VLE data CSV
             - In this project, it is located in '/datasets/dataset.csv'
-            - Structured in such a way -> ['solv_i_id','molefrac_i','gamma_i']
+            - Structured in such a way -> ['solv_i_id','molefrac_i','ln_gamma_i']
                 - solv_i_id     : String representing the mixture components,               e.g. "solvent_587 / solvent_604", "solvent_413 / solvent_708 / solvent_716"
                 - molefrac_i    : Mole fractions for respective solv_i,                     e.g. "0.10 / 0.90", "0.33 / 0.33 / 0.34"
-                - gamma_i       : Ground truth activity coefficient for respective solv_i,  e.g. "0.471759350 / 0.000251480", "1.719582080 / 2.044134780 / 0.887302160"
+                - ln_gamma_i       : Ground truth activity coefficient for respective solv_i,  e.g. "0.471759350 / 0.000251480", "1.719582080 / 2.044134780 / 0.887302160"
     """
     def __init__(self, components_csv: str):
         """
@@ -79,58 +79,68 @@ class DataPipeline:
 
     def parse_systems(self, raw_data_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Parse system strings into component lists with permutation invariance.
-        
-        Args:
-            raw_data_df (pd.DataFrame): Raw data with system strings
-            
-        Returns:
-            pd.DataFrame: Data with parsed component lists and system IDs
+        Parse system strings into component lists. Preserves original order.
         """
         system_parsed_df = raw_data_df.copy()
         
         def parse_system_string(system_str: str) -> List[str]:
-            """Parse system string like 'solvent_587 / solvent_604' into sorted component list"""
-            # Split by '/' and strip whitespace
-            components = [comp.strip() for comp in system_str.split('/')]
-            
-            return components
+            return [comp.strip() for comp in system_str.split('/')]
         
         system_parsed_df['component_list'] = system_parsed_df['solv_i_id'].apply(parse_system_string)
         
-        # Create canonical system string for grouping
-        system_parsed_df['canonical_system'] = system_parsed_df['component_list'].apply(
-            lambda x: ' / '.join(x)
-        )
-        
-        # Assign system_id based on unique canonical systems
-        unique_systems = system_parsed_df['canonical_system'].unique()
-        system_id_map = {system: idx for idx, system in enumerate(unique_systems)}
-        system_parsed_df['system_id'] = system_parsed_df['canonical_system'].map(system_id_map)
-        
-        print(f"Identified {len(unique_systems)} unique systems")
         return system_parsed_df
 
     def parse_numlist(self, system_parsed_df: pd.DataFrame) -> pd.DataFrame:
-            """
-            Parses string-based numeric lists (molefractions, gammas) into 
-            lists of floats. Assumes data format is clean.
+        """
+        Parses string-based numeric lists (molefractions, ln_gammas) into 
+        lists of floats.
+        
+        Args:
+            system_parsed_df (pd.DataFrame): DataFrame from parse_systems
             
-            Args:
-                system_parsed_df (pd.DataFrame): DataFrame from parse_systems
-                
-            Returns:
-                pd.DataFrame: Data with 'molefrac_list' and 'gamma_list'
-            """
-            canonical_df = system_parsed_df.copy()
-            
-            splitter = lambda s: [float(part.strip()) for part in s.split(' / ')]
+        Returns:
+            pd.DataFrame: Data with 'molefrac_list' and 'ln_gamma_list'
+        """
+        num_df = system_parsed_df.copy()
+        
+        splitter = lambda s: [float(part.strip()) for part in s.split(' / ')]
 
-            # Apply the parsing to the columns
-            canonical_df['molefrac_list'] = canonical_df['molefrac_i'].apply(splitter)
-            canonical_df['gamma_list'] = canonical_df['gamma_i'].apply(splitter)
-            
-            return canonical_df
+        # Apply the parsing to the columns
+        num_df['molefrac_list'] = num_df['molefrac_i'].apply(splitter)
+        num_df['ln_gamma_list'] = num_df['ln_gamma_i'].apply(splitter) 
+        
+        return num_df
+
+    def assign_system_ids(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate System IDs based on the SET of components (permutation invariant),
+        but strictly preserve the original order of data columns.
+        Logic:
+        1. Row: ['Water', 'Ethanol'] -> ID based on sorted {'Ethanol', 'Water'}
+        2. Row: ['Ethanol', 'Water'] -> ID based on sorted {'Ethanol', 'Water'}
+        
+        Result: Both get the same System ID, but input tensors remain as raw data.
+        """
+        df_ids = df.copy()
+
+        # Create a temporary column just for ID generation
+        # We sort the list of names ONLY to establish identity
+        df_ids['sorted_component_set'] = df_ids['component_list'].apply(
+            lambda x: ' / '.join(sorted(x))
+        )
+        
+        # Map unique sorted strings to integers
+        unique_systems = df_ids['sorted_component_set'].unique()
+        system_id_map = {sys: i for i, sys in enumerate(unique_systems)}
+        
+        # Assign the ID
+        df_ids['system_id'] = df_ids['sorted_component_set'].map(system_id_map)
+        
+        # Drop the temporary column
+        df_ids.drop(columns=['sorted_component_set'], inplace=True)
+        
+        print(f"System ID assignment complete. Found {len(unique_systems)} unique systems.")
+        return df_ids
 
     def construct_graphs(self, canonical_df: pd.DataFrame) -> List[Data]:
         """
@@ -171,7 +181,7 @@ class DataPipeline:
         for (idx, row), system_type in zip(canonical_df.iterrows(), system_types):
             components = row['component_list']
             mole_fracs = row['molefrac_list']
-            gammas = row['gamma_list']
+            ln_gammas = row['ln_gamma_list']
             
             node_features_list = []
             edge_index_list = []
@@ -231,7 +241,7 @@ class DataPipeline:
             edge_index = torch.cat(edge_index_list, dim=1)
             edge_attr = torch.cat(edge_attr_list, dim=0) if edge_attr_list else None
             mol_batch = torch.cat(mol_batch_list, dim=0)
-            
+            real_names = [self.solvent_id_to_name.get(c, c) for c in components]
             graph_data = Data(
                 x=x,
                 edge_index=edge_index,
@@ -239,8 +249,9 @@ class DataPipeline:
                 mol_batch=mol_batch,
                 component_batch=torch.arange(len(components), dtype=torch.long),
                 component_names=components,
+                actual_names=real_names,
                 component_mole_frac=torch.tensor(mole_fracs, dtype=torch.float),
-                component_gammas=torch.tensor(gammas, dtype=torch.float),
+                component_ln_gammas=torch.tensor(ln_gammas, dtype=torch.float),
                 system_type=system_type,
                 system_id=row['system_id']
             )
@@ -266,15 +277,20 @@ class DataPipeline:
         Convert RDKit molecule to graph representation with rich features.
 
         Node features include:
-        - One-hot atom type ('H', 'C', 'N', 'O', 'F', 'Si', 'P', 'S', 'Cl', 'Br', 'I') -> size 11
-        - Hybridization (sp, sp2, sp3) -> size 3
-        - Aromaticity -> size 1
-        - Ring membership -> size 1
-        - Hydrogen donor flags -> size 1
-        - Hydrogen acceptor flags -> size 1
+        - One-hot atom identity     -> size 11  type: int('H', 'C', 'N', 'O', 'F', 'Si', 'P', 'S', 'Cl', 'Br', 'I')
+        - Hybridization             -> size 3   type: int (sp, sp2, sp3)
+        - Aromaticity               -> size 1   type: int
+        - Ring membership           -> size 1   type: int
+        - Hydrogen donor flags      -> size 1   type: int
+        - Hydrogen acceptor flags   -> size 1   type: int
+        - Formal charge             -> size 1   type: int
+        - Partial charge            -> size 1   type: float
+        - Atomic mass               -> size 1   type: float
+        - Van der Waals radius      -> size 1   type: float
+        - Degree                    -> size 1   type: int
 
         Edge features:
-        - Bond type (single, double, triple, aromatic)
+        - Bond type                 -> size 4   type: float (single, double, triple, aromatic)
 
         Returns:
             node_features: torch.Tensor [num_atoms, num_node_features]
@@ -407,35 +423,32 @@ class DataPipeline:
         raw_csv: str,
         verbose: bool = True
     ) -> Tuple[pd.DataFrame, List[Data]]:
-        """
+        
+        if verbose: print("="*60 + "\nEXECUTION STARTED\n" + "="*60)
 
-        """
-        if verbose:
-            print("="*60)
-            print("EXECUTION STARTED")
-            print("="*60)
-            print("\nStep 1: Parsing raw data...")
-
+        # 1. Parse Raw Data
+        if verbose: print("\nStep 1: Parsing raw data...")
         raw_df = self.parse_raw_data(raw_csv)
 
-        if verbose:
-            print("\nStep 2: Parsing systems...")
+        # 2. Parse Strings to Lists (Keep Order!)
+        if verbose: print("\nStep 2: Parsing system strings (preserving order)...")
         parsed_df = self.parse_systems(raw_df)
 
-        if verbose:
-            print("\nStep 3: Parsing mole fractions and activity coefficients...")
-        canonical_df = self.parse_numlist(parsed_df)
+        # 3. Parse Numbers to Floats (Keep Order!)
+        if verbose: print("\nStep 3: Parsing numerical values...")
+        num_df = self.parse_numlist(parsed_df)
+
+        # 4. Assign IDs based on Set Identity (A+B = B+A)
+        if verbose: print("\nStep 4: Assigning permutation-invariant System IDs...")
+        # This replaces canonicalize_rows
+        ready_df = self.assign_system_ids(num_df)
+
+        # 5. Construct Graphs (Uses original order)
+        if verbose: print("\nStep 5: Constructing molecular graphs...")
+        graphs = self.construct_graphs(ready_df)
 
         if verbose:
-            print("\nStep 4: Constructing molecular graphs...")
-        graphs = self.construct_graphs(canonical_df)
+            print(f"\nPIPELINE COMPLETE! Created {len(graphs)} graphs.")
+            print(f"Unique systems: {ready_df['system_id'].nunique()}")
 
-        if verbose:
-            print("\n" + "="*60)
-            print("PIPELINE COMPLETE!")
-            print(f"Processed {len(canonical_df)} data points")
-            print(f"Created {len(graphs)} molecular graphs")
-            print(f"Unique systems: {canonical_df['system_id'].nunique()}")
-            print("="*60)
-
-        return canonical_df, graphs
+        return ready_df, graphs

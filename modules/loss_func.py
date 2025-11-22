@@ -33,12 +33,12 @@ class MixMSELoss(nn.Module):
                                    shape [N_total_components]
             batched_data (torch_geometric.data.Batch): 
                                    The batch object from the DataLoader.
-                                   Must contain 'component_gammas' (as y_true)
+                                   Must contain 'component_ln_gammas' (as y_true)
                                    and 'component_batch_batch' (as batch_index).
         """
         
         # Extract targets and batch index from the batch object
-        y_true = batched_data.component_gammas
+        y_true = batched_data.component_ln_gammas
         batch_index = batched_data.component_batch_batch
 
         # 1. Calculate the component-wise squared error for all N components
